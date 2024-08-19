@@ -1,8 +1,10 @@
 local M = {}
-local issues = require("linear.issues")
+local i = require("linear.issues")
 
 M.fetchIssues = function()
-    issues.issues()
+	if i.validateKey() then
+		i.pickIssue(i.fetchIssues())
+	end
 end
 
 return M
