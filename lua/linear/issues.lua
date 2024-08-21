@@ -6,27 +6,21 @@ local finders = require("telescope.finders")
 local sorters = require("telescope.sorters")
 local conf = require("linear.config")
 
----@return boolean
-function M.validateKey()
-	local linearAPI = conf.defaults.linear_api
-	if linearAPI == nil then
-		print("Linear API Token Not Found")
-		return false
-	end
-	return true
-end
-
 ---@alias issueList {branch: string, title: string, status: string}[]
+---@param apiKey string
 ---@return issueList
-function M.fetchIssues()
+function M.fetchIssues(apiKey)
 	local issueList = {}
 	local request = curl.post(conf.defaults.linear_url, {
 		headers = {
 			["Content-Type"] = "application/json",
-			["Authorization"] = conf.defaults.linear_api,
+			["Authorization"] = apiKey,
 		},
 		body = conf.defaults.issues_query,
 	})
+	if request.status ~= 200 then
+		error("Failed to fetch issues")
+	end
 	-- Decode into json and grab the fields
 	local payload = vim.json.decode(request.body)
 	for _, value in ipairs(payload["data"]["issues"]["nodes"]) do
