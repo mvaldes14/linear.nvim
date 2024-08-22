@@ -8,8 +8,7 @@ lint:
 
 test:
 	echo "===> Testing"
-	nvim --headless --noplugin -u test/minimal.vim \
-        -c "PlenaryBustedDirectory test/ {minimal_init = 'test/minimal.vim'}"
+	nvim --headless --noplugin -u lua/linear/test/minimal.vim -c "PlenaryBustedDirectory lua/linear/test/ {minimal_init = 'lua/linear/test/minimal.vim'}"
 
 clean:
 	echo "===> Cleaning"

@@ -1,5 +1,6 @@
 local M = {}
 local conf = require("linear.config")
+local curl = require("plenary.curl")
 
 ---@return string
 function M.getKey()
@@ -13,6 +14,28 @@ function M.getKey()
 		key = linearAPICmd
 	end
 	return key
+end
+
+---@param url string
+---@param body string
+---@param apiKey string
+---@return response any
+function M.makeRequest(apiKey, url, body)
+	print(body)
+	local request = curl.post(url, {
+		headers = {
+			["Content-Type"] = "application/json",
+			["Authorization"] = apiKey,
+		},
+		body = body,
+	})
+	if request.status ~= 200 then
+		error("Failed to fetch issues")
+		print(request)
+	end
+	-- Decode into json and grab the fields
+	local payload = vim.json.decode(request.body)
+	return payload
 end
 
 return M

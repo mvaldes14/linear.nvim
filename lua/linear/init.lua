@@ -6,6 +6,8 @@ M.fetchIssues = function()
 	local key = u.getKey()
 	if key then
 		i.pickIssue(i.fetchIssues(key))
+	else
+		print("API Key not found")
 	end
 end
 
