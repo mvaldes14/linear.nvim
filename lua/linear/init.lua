@@ -11,4 +11,13 @@ M.fetchIssues = function()
 	end
 end
 
+M.createIssue = function()
+	local key = u.getKey()
+	if key then
+		i.createIssue(key)
+	else
+		print("API Key not found")
+	end
+end
+
 return M

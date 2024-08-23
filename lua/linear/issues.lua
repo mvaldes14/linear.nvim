@@ -38,7 +38,31 @@ local function fetchSingleIssue(apiKey, issueID)
 	return request
 end
 
+---@param apiKey string
+---@return string
+local function getTeamID(apiKey)
+	local query = '{"query":"query Teams { teams { nodes { id name } }}"}'
+	local request = utils.makeRequest(apiKey, LINEAR_API_URL, query)
+	return request["data"]["teams"]["nodes"]["id"]
+end
+
+function M.createIssue(apiKey, title, description)
+	local teamID = getTeamID(apiKey)
+	local query = string.format(
+		[[{"query":"mutation CreateIssue { createIssue(input: {title: "%s", description: "%s", teamId: "%s"}) { issue { id } } }"}]],
+		title,
+		description,
+		teamID
+	)
+	local encoded_query = string.gsub(query, '"', '\\"')
+	local request = utils.makeRequest(apiKey, LINEAR_API_URL, encoded_query)
+	if not request["data"]["issueCreate"]["success"] then
+		print("Issue not created")
+	end
+end
+
 ---@param issueList issueList
+---@resturn nil
 function M.pickIssue(issueList)
 	pickers
 		.new({}, {
