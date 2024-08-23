@@ -30,6 +30,7 @@ end
 ---@param apiKey string
 ---@alias issueItem {title: string, status: string, description: string}
 ---@return issueItem
+--'{"query":"query Issue {  issue(id: \"TW-37\") {    title state { name }  description  assignee { name } project { name }  priorityLabel  comments {  nodes {  body  createdAt  user {  name }  } } }}"}'
 local function fetchSingleIssue(apiKey, issueID)
 	local query = [[{"query":"query Issue { issue(id: "TW-1") { title state { name } description }}"}]]
 	local encoded_query = string.gsub(query, '"', '\\"')
