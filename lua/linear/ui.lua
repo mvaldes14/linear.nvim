@@ -1,22 +1,30 @@
-local popup = require("plenary.popup")
 local M = {}
+local Popup = require("nui.popup")
 
-function M.createUI()
-	local bufnr = vim.api.nvim_create_buf(false, false)
-	local width = 60
-	local height = 10
-	local id, win = popup.create(bufnr, {
-		title = "Linear",
-		line = math.floor(((vim.o.lines - height) / 2) - 1),
-		col = math.floor((vim.o.columns - width) / 2),
-		minwidth = width,
-		minheight = height,
-		borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
+function M.showUI(issueItem, id)
+	local popup = Popup({
+		enter = true,
+		border = {
+			style = "rounded",
+			text = {
+				top = "Issue" .. id,
+				top_align = "center",
+			},
+		},
+		focusable = true,
+		position = "50%",
+		size = {
+			width = "40%",
+			height = "40%",
+		},
 	})
-	return {
-		id = id,
-		win = win,
-	}
+
+	local title = issueItem["data"]["issue"]["title"]
+	local description = issueItem["data"]["issue"]["description"]
+	local state = issueItem["data"]["issue"]["state"]["name"]
+	local msg = string.format("ID: %s, Title: %s,  State: %s,  Description: %s", id, title, description, state)
+	vim.api.nvim_buf_set_lines(popup.bufnr, -1, -1, false, { msg })
+	popup:mount()
 end
 
-M.ui = M.createUI()
+return M

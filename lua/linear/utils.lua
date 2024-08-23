@@ -21,7 +21,6 @@ end
 ---@param apiKey string
 ---@return response any
 function M.makeRequest(apiKey, url, body)
-	print(body)
 	local request = curl.post(url, {
 		headers = {
 			["Content-Type"] = "application/json",

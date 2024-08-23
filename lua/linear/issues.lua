@@ -7,6 +7,7 @@ local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
 local sorters = require("telescope.sorters")
 local utils = require("linear.utils")
+local ui = require("linear.ui")
 
 ---@alias issueList {branch: string, title: string, status: string}[]
 ---@param apiKey string
@@ -33,9 +34,10 @@ end
 -- USE THIS QUERY FOR MORE INFO
 --'{"query":"query Issue {  issue(id: \"TW-37\") {    title state { name }  description  assignee { name } project { name }  priorityLabel  comments {  nodes {  body  createdAt  user {  name }  } } }}"}'
 local function fetchSingleIssue(apiKey, issueID)
-	local query = [[{"query":"query Issue { issue(id: "TW-1") { title state { name } description }}"}]]
-	local encoded_query = string.gsub(query, '"', '\\"')
-	local request = utils.makeRequest(apiKey, LINEAR_API_URL, encoded_query)
+	local payload = {
+		query = string.format('query Issue { issue(id: "%s") { title state { name } description }}', issueID),
+	}
+	local request = utils.makeRequest(apiKey, LINEAR_API_URL, vim.json.encode(payload))
 	return request
 end
 
@@ -119,7 +121,7 @@ function M.pickIssue(issueList)
 					actions.close(prompt_bufnr)
 					local selection = action_state.get_selected_entry()
 					local issue = fetchSingleIssue(utils.getKey(), selection.value.id)
-					print(issue)
+					ui.showUI(issue, selection.value.id)
 				end)
 				return true
 			end,
