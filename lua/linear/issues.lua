@@ -30,6 +30,7 @@ end
 ---@param apiKey string
 ---@alias issueItem {title: string, status: string, description: string}
 ---@return issueItem
+-- USE THIS QUERY FOR MORE INFO
 --'{"query":"query Issue {  issue(id: \"TW-37\") {    title state { name }  description  assignee { name } project { name }  priorityLabel  comments {  nodes {  body  createdAt  user {  name }  } } }}"}'
 local function fetchSingleIssue(apiKey, issueID)
 	local query = [[{"query":"query Issue { issue(id: "TW-1") { title state { name } description }}"}]]
@@ -46,13 +47,48 @@ local function getTeamID(apiKey)
 	return request["data"]["teams"]["nodes"]["id"]
 end
 
+---@param apiKey string
+---@return table
+local function getLabelID(apiKey)
+	local labels = {}
+	local query = '{"query":"query IssueLabels { issueLabels { nodes { id  name } }}"}'
+	local encoded_query = string.gsub(query, '"', '\\"')
+	local request = utils.makeRequest(apiKey, LINEAR_API_URL, encoded_query)
+	for _, value in ipairs(request["data"]["issueLabels"]["nodes"]) do
+		table.insert(labels, { value["id"], value["name"] })
+	end
+	return labels
+end
+
+--@param apiKey string
+--@return table
+local function getProjectID(apiKey)
+	local projects = {}
+	local query = '{"query":"query IssueLabels { issueLabels { nodes { id   name } }}"}'
+	local encoded_query = string.gsub(query, '"', '\\"')
+	local request = utils.makeRequest(apiKey, LINEAR_API_URL, encoded_query)
+	for _, value in ipairs(request["data"]["projects"]["nodes"]) do
+		table.insert(projects, { value["id"], value["name"] })
+	end
+	return projects
+end
+
 function M.createIssue(apiKey, title, description)
 	local teamID = getTeamID(apiKey)
+	-- TODO: Get labels and ask for user input
+	-- TODO: Get project and ask for user input
+	local labelID = getLabelID(apiKey)
+	local projectID = getProjectID(apiKey)
+
+	-- Get user to pick via ui
+
 	local query = string.format(
-		[[{"query":"mutation CreateIssue { createIssue(input: {title: "%s", description: "%s", teamId: "%s"}) { issue { id } } }"}]],
+		[[ '{"query":"mutation IssueCreate { issueCreate( input: { title: \"%s\"  description: \"%s\"  teamId: \"%s\"  labelIds: \"%s\"  projectId: \"%s\" }){ success issue { id title }}}",}']],
 		title,
 		description,
-		teamID
+		teamID,
+		labelID,
+		projectID
 	)
 	local encoded_query = string.gsub(query, '"', '\\"')
 	local request = utils.makeRequest(apiKey, LINEAR_API_URL, encoded_query)
