@@ -31,11 +31,12 @@ end
 ---@param apiKey string
 ---@alias issueItem {title: string, status: string, description: string}
 ---@return issueItem
--- USE THIS QUERY FOR MORE INFO
---'{"query":"query Issue {  issue(id: \"TW-37\") {    title state { name }  description  assignee { name } project { name }  priorityLabel  comments {  nodes {  body  createdAt  user {  name }  } } }}"}'
 local function fetchSingleIssue(apiKey, issueID)
 	local payload = {
-		query = string.format('query Issue { issue(id: "%s") { title state { name } description }}', issueID),
+		query = string.format(
+			'query Issue { issue(id: "%s") { title state { name } description assignee {name} project {name} priorityLabel comments {nodes {body createdAt user{name}}}}}',
+			issueID
+		),
 	}
 	local request = utils.makeRequest(apiKey, LINEAR_API_URL, vim.json.encode(payload))
 	return request
