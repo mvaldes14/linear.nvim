@@ -43,18 +43,22 @@ local function fetchSingleIssue(apiKey, issueID)
 end
 
 ---@param apiKey string
----@return string
+---@return table
 local function getTeamID(apiKey)
+	local teams = {}
 	local query = '{"query":"query Teams { teams { nodes { id name } }}"}'
 	local request = utils.makeRequest(apiKey, LINEAR_API_URL, query)
-	return request["data"]["teams"]["nodes"]["id"]
+	for _, value in ipairs(request["data"]["teams"]["nodes"]) do
+		table.insert(teams, { value["id"], value["name"] })
+	end
+	return teams
 end
 
 ---@param apiKey string
 ---@return table
 local function getLabelID(apiKey)
 	local labels = {}
-	local query = '{"query":"query IssueLabels { issueLabels { nodes { id  name } }}"}'
+	local query = '{"query":"query{ issueLabels {  nodes {  id  name }  }}"}'
 	local encoded_query = string.gsub(query, '"', '\\"')
 	local request = utils.makeRequest(apiKey, LINEAR_API_URL, encoded_query)
 	for _, value in ipairs(request["data"]["issueLabels"]["nodes"]) do
@@ -78,26 +82,28 @@ end
 
 function M.createIssue(apiKey, title, description)
 	local teamID = getTeamID(apiKey)
-	-- TODO: Get labels and ask for user input
-	-- TODO: Get project and ask for user input
-	local labelID = getLabelID(apiKey)
-	local projectID = getProjectID(apiKey)
+	-- local labelID = getLabelID(apiKey)
+	-- local projectID = getProjectID(apiKey)
 
 	-- Get user to pick via ui
+	local team_pick = ui.pickItem(teamID, "Team")
+	print(team_pick)
+	-- local label_pick = ui.pickItem(labelID, "Label")
+	-- local project_pick = ui.pickItem(projectID, "Project")
 
-	local query = string.format(
-		[[ '{"query":"mutation IssueCreate { issueCreate( input: { title: \"%s\"  description: \"%s\"  teamId: \"%s\"  labelIds: \"%s\"  projectId: \"%s\" }){ success issue { id title }}}",}']],
-		title,
-		description,
-		teamID,
-		labelID,
-		projectID
-	)
-	local encoded_query = string.gsub(query, '"', '\\"')
-	local request = utils.makeRequest(apiKey, LINEAR_API_URL, encoded_query)
-	if not request["data"]["issueCreate"]["success"] then
-		print("Issue not created")
-	end
+	-- local query = string.format(
+	-- 	[[ '{"query":"mutation IssueCreate { issueCreate( input: { title: \"%s\"  description: \"%s\"  teamId: \"%s\"  labelIds: \"%s\"  projectId: \"%s\" }){ success issue { id title }}}",}']],
+	-- 	title,
+	-- 	description,
+	-- 	teamID,
+	-- 	labelID,
+	-- 	projectID
+	-- )
+	-- local encoded_query = string.gsub(query, '"', '\\"')
+	-- local request = utils.makeRequest(apiKey, LINEAR_API_URL, encoded_query)
+	-- if not request["data"]["issueCreate"]["success"] then
+	-- 	print("Issue not created")
+	-- end
 end
 
 ---@param issueList issueList
@@ -122,7 +128,7 @@ function M.pickIssue(issueList)
 					actions.close(prompt_bufnr)
 					local selection = action_state.get_selected_entry()
 					local issue = fetchSingleIssue(utils.getKey(), selection.value.id)
-					ui.showUI(issue, selection.value.id)
+					ui.showIssue(issue, selection.value.id)
 				end)
 				return true
 			end,

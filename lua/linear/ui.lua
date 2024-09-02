@@ -1,8 +1,12 @@
 local M = {}
 local Popup = require("nui.popup")
 local Layout = require("nui.layout")
+local Menu = require("nui.menu")
+local utils = require("linear.utils")
 
-function M.showUI(issueItem, id)
+---@param issueItem issueItem
+---@param id string
+function M.showIssue(issueItem, id)
 	local popup_main = Popup({
 		border = {
 			style = "rounded",
@@ -12,14 +16,15 @@ function M.showUI(issueItem, id)
 			},
 		},
 		position = "50%",
-		size = "50%",
-		--   {
-		-- 	width = "40%",
-		-- 	height = "30%",
-		-- },
+		size = {
+			width = "40%",
+			height = "30%",
+		},
 	})
 
 	local popup_comments = Popup({
+		enter = true,
+		focusable = true,
 		border = {
 			style = "rounded",
 			text = {
@@ -85,11 +90,54 @@ function M.showUI(issueItem, id)
 	end
 
 	layout:update(Layout.Box({
-		Layout.Box(popup_main, { size = "40%" }),
-		Layout.Box(popup_comments, { size = "60%" }),
+		Layout.Box(popup_main, { size = "30%" }),
+		Layout.Box(popup_comments, { size = "70%" }),
 	}, { dir = "col" }))
 
 	layout:mount()
+	popup_comments:map("n", "<esc>", function()
+		layout:unmount()
+	end, { noremap = true })
 end
 
+---@param item_list table
+---@param type string
+function M.pickItem(item_list, type)
+	local menu_list = {}
+	for _, value in ipairs(item_list) do
+		table.insert(menu_list, Menu.item(value[2]))
+	end
+	local menu = Menu({
+		position = "50%",
+		size = {
+			width = 25,
+			height = 5,
+		},
+		border = {
+			style = "single",
+			text = {
+				top = "Choose: " .. type,
+				top_align = "center",
+			},
+		},
+		win_options = {
+			winhighlight = "Normal:Normal,FloatBorder:Normal",
+		},
+	}, {
+		lines = menu_list,
+		max_width = 20,
+		keymap = {
+			focus_next = { "j", "<Down>", "<Tab>" },
+			focus_prev = { "k", "<Up>", "<S-Tab>" },
+			close = { "<Esc>", "<C-c>" },
+			submit = { "<CR>", "<Space>" },
+		},
+		on_submit = function(item)
+			utils.state(item)
+		end,
+	})
+
+	-- mount the component
+	menu:mount()
+end
 return M
