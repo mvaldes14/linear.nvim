@@ -37,9 +37,4 @@ function M.makeRequest(apiKey, url, body)
 	return payload
 end
 
-function M.state(any)
-	local store = {}
-	table.insert(store, any)
-end
-
 return M

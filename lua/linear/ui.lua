@@ -46,6 +46,7 @@ function M.showIssue(issueItem, id)
 				width = 80,
 				height = "80%",
 			},
+			relative = "editor",
 		},
 		Layout.Box({
 			Layout.Box(popup_main, { size = "40%" }),
@@ -69,14 +70,18 @@ function M.showIssue(issueItem, id)
 	end
 
 	local item_info = {
-		"Title: " .. title,
-		"State: " .. state,
-		"Description: " .. description,
-		"Asignee: " .. assignee,
-		"Project: " .. project,
-		"Label: " .. label,
+		Title = title,
+		State = state,
+		Asignee = assignee,
+		Project = project,
+		Label = label,
 	}
-	for _, value in ipairs(item_info) do
+	for key, value in pairs(item_info) do
+		vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { key .. ": " .. value })
+	end
+	local description_lines = vim.split(description, "\n")
+	vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { "Description: " })
+	for _, value in ipairs(description_lines) do
 		vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { value })
 	end
 	for _, value in ipairs(comments) do
