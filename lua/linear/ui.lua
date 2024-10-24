@@ -1,8 +1,8 @@
 local M = {}
 local Popup = require("nui.popup")
-local Layout = require("nui.layout")
 local Menu = require("nui.menu")
 local utils = require("linear.utils")
+local issue = require("linear.models")
 
 ---@param issueItem issueItem
 ---@param id string
@@ -11,53 +11,26 @@ function M.showIssue(issueItem, id)
 		border = {
 			style = "rounded",
 			text = {
-				top = "Issue: " .. id,
+				top = id,
 				top_align = "center",
 			},
 		},
 		position = "50%",
 		size = {
-			width = "40%",
-			height = "30%",
+			width = "80%",
+			height = "40%",
 		},
-	})
-
-	local popup_comments = Popup({
 		enter = true,
 		focusable = true,
-		border = {
-			style = "rounded",
-			text = {
-				top = "Updates",
-				top_align = "center",
-			},
-		},
-		position = "50%",
-		size = {
-			width = "40%",
-			height = "80%",
+		buf_options = {
+			readonly = true,
+			wrap = true,
 		},
 	})
-
-	local layout = Layout(
-		{
-			position = "50%",
-			size = {
-				width = 80,
-				height = "80%",
-			},
-			relative = "editor",
-		},
-		Layout.Box({
-			Layout.Box(popup_main, { size = "40%" }),
-			Layout.Box(popup_comments, { size = "60%" }),
-		}, { dir = "row" })
-	)
 
 	local title = issueItem["data"]["issue"]["title"]
 	local description = issueItem["data"]["issue"]["description"]
 	local state = issueItem["data"]["issue"]["state"]["name"]
-	local assignee = issueItem["data"]["issue"]["assignee"]["name"]
 	local project = issueItem["data"]["issue"]["project"]["name"]
 	local label = issueItem["data"]["issue"]["priorityLabel"]
 	local comment_list = issueItem["data"]["issue"]["comments"]["nodes"]
@@ -68,40 +41,45 @@ function M.showIssue(issueItem, id)
 			{ comment = value["body"], created = value["createdAt"], username = value["user"]["name"] }
 		)
 	end
-
-	local item_info = {
+	local issueObject = {
 		Title = title,
 		State = state,
-		Asignee = assignee,
 		Project = project,
 		Label = label,
 	}
-	for key, value in pairs(item_info) do
+
+	-- Build the object
+	local obj = issue.create(issueObject)
+	local descriptionList = issue.description(description)
+	-- Add to UI Elements
+	for key, value in pairs(obj) do
 		vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { key .. ": " .. value })
 	end
-	local description_lines = vim.split(description, "\n")
+
 	vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { "Description: " })
-	for _, value in ipairs(description_lines) do
-		vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { value })
+	for _, value in ipairs(descriptionList) do
+		vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, value)
 	end
+
+	vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { "----------------------" })
+	vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { "Updates: " })
 	for _, value in ipairs(comments) do
 		local update = vim.split(value["comment"], "\n")
-		vim.api.nvim_buf_set_lines(popup_comments.bufnr, -1, -1, false, { "Username: " .. value["username"] })
-		vim.api.nvim_buf_set_lines(popup_comments.bufnr, -1, -1, false, { "Created: " .. value["created"] })
+		vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { "Username: " .. value["username"] })
+		vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { "Created: " .. value["created"] })
 		for _, comment in ipairs(update) do
-			vim.api.nvim_buf_set_lines(popup_comments.bufnr, -1, -1, false, { comment })
+			vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { comment })
 		end
-		vim.api.nvim_buf_set_lines(popup_comments.bufnr, -1, -1, false, { "----------------------" })
+		vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { "----------------------" })
 	end
 
-	layout:update(Layout.Box({
-		Layout.Box(popup_main, { size = "30%" }),
-		Layout.Box(popup_comments, { size = "70%" }),
-	}, { dir = "col" }))
-
-	layout:mount()
-	popup_comments:map("n", "<esc>", function()
-		layout:unmount()
+	-- Show Elements
+	popup_main:mount()
+	popup_main:map("n", "<esc>", function()
+		popup_main:unmount()
+	end, { noremap = true })
+	popup_main:map("n", "G", function()
+		vim.cmd("!git checkout branch" .. id)
 	end, { noremap = true })
 end
 

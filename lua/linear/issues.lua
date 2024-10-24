@@ -128,7 +128,7 @@ function M.pickIssue(issueList)
 					actions.close(prompt_bufnr)
 					local selection = action_state.get_selected_entry()
 					local issue = fetchSingleIssue(utils.getKey(), selection.value.id)
-					ui.showIssue(issue, selection.value.id)
+					ui.showIssue(issue, selection.value.branch)
 				end)
 				return true
 			end,
