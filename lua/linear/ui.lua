@@ -80,7 +80,11 @@ function M.showIssue(issueItem, id)
 		popup_main:unmount()
 	end, { noremap = true })
 	popup_main:map("n", "G", function()
-		vim.cmd("!git checkout branch" .. id)
+		vim.cmd("!git checkout -b " .. id)
+	end, { noremap = true })
+	popup_main:map("n", "A", function()
+		-- TODO: For branch TW-52
+		print("Pending")
 	end, { noremap = true })
 	-- Set the buffer in wrap mode for better readability
 	vim.api.nvim_buf_set_option(popup_main.bufnr, "wrap", true)
