@@ -13,6 +13,8 @@ function M.showIssue(issueItem, id)
 			text = {
 				top = id,
 				top_align = "center",
+				bottom = "<esc> close, <G> switch to branch, <A> assign to self",
+				bottom_allign = "center",
 			},
 		},
 		position = "50%",
@@ -24,7 +26,6 @@ function M.showIssue(issueItem, id)
 		focusable = true,
 		buf_options = {
 			readonly = true,
-			wrap = true,
 		},
 	})
 
@@ -81,6 +82,8 @@ function M.showIssue(issueItem, id)
 	popup_main:map("n", "G", function()
 		vim.cmd("!git checkout branch" .. id)
 	end, { noremap = true })
+	-- Set the buffer in wrap mode for better readability
+	vim.api.nvim_buf_set_option(popup_main.bufnr, "wrap", true)
 end
 
 ---@param item_list table
