@@ -38,20 +38,19 @@ function M.showIssue(issueItem, id)
 		project = vim.tbl_get(issueItem, "data", "issue", "project", "name"),
 		label = vim.tbl_get(issueItem, "data", "issue", "priorityLabel"),
 		description = vim.tbl_get(issueItem, "data", "issue", "description"),
-		updates = vim.tbl_get(issueItem, "data", "issue", "comments", "nodes"),
 	}
 
 	-- Build the object
 	local obj = Issue:new(issue)
-	local table_result = Issue.print(obj)
+
 	-- Add to UI Elements
-	for _, value in ipairs(table_result) do
-		vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { value })
-	end
-	--
-	-- -- Updates are done differently due to them being more than 1
-	vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { "Updates: " })
-	for _, value in ipairs(issue["updates"]) do
+	local table_result = obj:print_result()
+	vim.api.nvim_buf_set_lines(popup_main.bufnr, 0, -1, false, table_result)
+
+	-- Updates are done differently due to them being more than 1 or nil
+	vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { "----------------------" })
+	local updates = vim.tbl_get(issueItem, "data", "issue", "comments", "nodes")
+	for _, value in ipairs(updates) do
 		local update = vim.split(value["body"], "\n")
 		vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { "Username: " .. value["user"]["name"] })
 		vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { "Created: " .. value["createdAt"] })

@@ -1,48 +1,31 @@
 local Issue = {}
-Issue.__index = Issue
-
 Issue.defaults = {
 	assignee = "Not Assigned",
 	project = "Not Defined",
 	label = "Not Defined",
 	title = "Not Defined",
-	state = "?",
+	state = "Not Defined",
 	description = "Not Available",
-	updates = {
-		{ comment = "Example", created = "Tomorrow", username = "John Doe" },
-	},
 }
 
--- TODO: Should return the entire table with everything on it so we don't iterate on the ui element
-function Issue:new(options)
-	local newIssue = setmetatable({}, self)
+function Issue:new(field)
+	local obj = setmetatable({}, self)
+	self.__index = self
 	for key, value in pairs(self.defaults) do
-		if options[key] ~= nil then
-			newIssue[key] = options[key]
+		if field[key] ~= nil then
+			obj[key] = field[key]
 		else
-			newIssue[key] = value
+			obj[key] = value
 		end
 	end
-	return newIssue
+	return obj
 end
 
-function Issue.print(issue)
-	local first = "Title: %s \nState: %s \nProject: %s \nAssignee: %s \nLabels: %s \nDescription: %s \n"
-	local tbl = string.format(
-		first,
-		issue["title"],
-		issue["state"],
-		issue["project"],
-		issue["assignee"],
-		issue["label"],
-		issue["description"]
-	)
-	-- for _, value in ipairs(issue["updates"]) do
-	-- 	second = second .. "Username" .. value["username"]
-	-- 	second = second .. "Created" .. value["created"]
-	-- end
-	-- local result = tbl .. second
-	return vim.split(tbl, "\n")
+function Issue:print_result()
+	local placeholder = "Title: %s \nState: %s \nProject: %s \nAssignee: %s \nLabels: %s \nDescription: %s \nUpdates:"
+	local formatted_string =
+		string.format(placeholder, self.title, self.state, self.project, self.assignee, self.label, self.description)
+	return vim.split(formatted_string, "\n")
 end
 
 return Issue
