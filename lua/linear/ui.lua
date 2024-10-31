@@ -2,7 +2,7 @@ local M = {}
 local Popup = require("nui.popup")
 local Menu = require("nui.menu")
 local utils = require("linear.utils")
-local issue = require("linear.models")
+local Issue = require("linear.models")
 
 ---@param issueItem issueItem
 ---@param id string
@@ -29,45 +29,32 @@ function M.showIssue(issueItem, id)
 		},
 	})
 
-	local title = issueItem["data"]["issue"]["title"]
-	local description = issueItem["data"]["issue"]["description"]
-	local state = issueItem["data"]["issue"]["state"]["name"]
-	local project = issueItem["data"]["issue"]["project"]["name"]
-	local label = issueItem["data"]["issue"]["priorityLabel"]
-	local comment_list = issueItem["data"]["issue"]["comments"]["nodes"]
-	local comments = {}
-	for _, value in ipairs(comment_list) do
-		table.insert(
-			comments,
-			{ comment = value["body"], created = value["createdAt"], username = value["user"]["name"] }
-		)
-	end
-	local issueObject = {
-		Title = title,
-		State = state,
-		Project = project,
-		Label = label,
+	-- Meta Object
+	-- These are the paths returned by the API, using tbl_get prevents an invalid lookup
+	local issue = {
+		title = vim.tbl_get(issueItem, "data", "issue", "title"),
+		assignee = vim.tbl_get(issueItem, "data", "issue", "assignee", "name"),
+		state = vim.tbl_get(issueItem, "data", "issue", "state", "name"),
+		project = vim.tbl_get(issueItem, "data", "issue", "project", "name"),
+		label = vim.tbl_get(issueItem, "data", "issue", "priorityLabel"),
+		description = vim.tbl_get(issueItem, "data", "issue", "description"),
+		updates = vim.tbl_get(issueItem, "data", "issue", "comments", "nodes"),
 	}
 
 	-- Build the object
-	local obj = issue.create(issueObject)
-	local descriptionList = issue.description(description)
+	local obj = Issue:new(issue)
+	local table_result = Issue.print(obj)
 	-- Add to UI Elements
-	for key, value in pairs(obj) do
-		vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { key .. ": " .. value })
+	for _, value in ipairs(table_result) do
+		vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { value })
 	end
-
-	vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { "Description: " })
-	for _, value in ipairs(descriptionList) do
-		vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, value)
-	end
-
-	vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { "----------------------" })
+	--
+	-- -- Updates are done differently due to them being more than 1
 	vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { "Updates: " })
-	for _, value in ipairs(comments) do
-		local update = vim.split(value["comment"], "\n")
-		vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { "Username: " .. value["username"] })
-		vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { "Created: " .. value["created"] })
+	for _, value in ipairs(issue["updates"]) do
+		local update = vim.split(value["body"], "\n")
+		vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { "Username: " .. value["user"]["name"] })
+		vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { "Created: " .. value["createdAt"] })
 		for _, comment in ipairs(update) do
 			vim.api.nvim_buf_set_lines(popup_main.bufnr, -1, -1, false, { comment })
 		end
