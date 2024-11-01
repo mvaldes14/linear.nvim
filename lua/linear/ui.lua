@@ -29,19 +29,8 @@ function M.showIssue(issueItem, id)
 		},
 	})
 
-	-- Meta Object
-	-- These are the paths returned by the API, using tbl_get prevents an invalid lookup
-	local issue = {
-		title = vim.tbl_get(issueItem, "data", "issue", "title"),
-		assignee = vim.tbl_get(issueItem, "data", "issue", "assignee", "name"),
-		state = vim.tbl_get(issueItem, "data", "issue", "state", "name"),
-		project = vim.tbl_get(issueItem, "data", "issue", "project", "name"),
-		label = vim.tbl_get(issueItem, "data", "issue", "priorityLabel"),
-		description = vim.tbl_get(issueItem, "data", "issue", "description"),
-	}
-
 	-- Build the object
-	local obj = Issue:new(issue)
+	local obj = Issue:new(issueItem)
 
 	-- Add to UI Elements
 	local table_result = obj:print_result()
