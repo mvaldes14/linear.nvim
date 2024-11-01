@@ -3,6 +3,7 @@ local Popup = require("nui.popup")
 local Menu = require("nui.menu")
 local utils = require("linear.utils")
 local Issue = require("linear.models")
+local Store = require("linear.store")
 
 ---@param issueItem issueItem
 ---@param id string
@@ -31,6 +32,8 @@ function M.showIssue(issueItem, id)
 
 	-- Build the object
 	local obj = Issue:new(issueItem)
+	local current_issue_id = obj["id"]
+	local current_user_id = obj["assignee_id"]
 
 	-- Add to UI Elements
 	local table_result = obj:print_result()

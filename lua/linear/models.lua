@@ -1,6 +1,8 @@
 local Issue = {}
 Issue.defaults = {
+	id = "Not Defined",
 	assignee = "Not Assigned",
+	assignee_id = "",
 	project = "Not Defined",
 	label = "Not Defined",
 	title = "Not Defined",
@@ -14,8 +16,10 @@ function Issue:new(field)
 
 	-- These are the paths returned by the API, using tbl_get prevents an invalid lookup
 	local issue = {
+		id = vim.tbl_get(field, "data", "issue", "id"),
 		title = vim.tbl_get(field, "data", "issue", "title"),
 		assignee = vim.tbl_get(field, "data", "issue", "assignee", "name"),
+		assignee_id = vim.tbl_get(field, "data", "issue", "assignee", "id"),
 		state = vim.tbl_get(field, "data", "issue", "state", "name"),
 		project = vim.tbl_get(field, "data", "issue", "project", "name"),
 		label = vim.tbl_get(field, "data", "issue", "priorityLabel"),

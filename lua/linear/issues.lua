@@ -1,6 +1,5 @@
 -- Query the Linear API to fetch issues
 local M = {}
-local LINEAR_API_URL = "https://api.linear.app/graphql"
 local pickers = require("telescope.pickers")
 local finders = require("telescope.finders")
 local actions = require("telescope.actions")
@@ -8,6 +7,8 @@ local action_state = require("telescope.actions.state")
 local sorters = require("telescope.sorters")
 local utils = require("linear.utils")
 local ui = require("linear.ui")
+local api = require("linear.api")
+local LINEAR_API_URL = "https://api.linear.app/graphql"
 
 ---@alias issueList {branch: string, title: string, status: string}[]
 ---@param apiKey string
@@ -34,7 +35,7 @@ end
 local function fetchSingleIssue(apiKey, issueID)
 	local payload = {
 		query = string.format(
-			'query Issue { issue(id: "%s") { title state { name } description assignee {name} project {name} priorityLabel comments {nodes {body createdAt user{name}}}}}',
+			'query Issue { issue(id: "%s") { id title state { name } description assignee {id name} project {name} priorityLabel comments {nodes {body createdAt user{name}}}}}',
 			issueID
 		),
 	}
