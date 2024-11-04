@@ -4,7 +4,7 @@ local curl = require("plenary.curl")
 
 ---@param url string
 ---@param body string
----@return response any
+---@return response table
 function M.makeRequest(url, body)
 	local key = M.getKey()
 	local request = curl.post(url, {
