@@ -1,20 +1,22 @@
 local M = {}
-local i = require("linear.issues")
-local u = require("linear.utils")
+local api = require("linear.api")
+local utils = require("linear.utils")
+local issues = require("linear.issues")
 
 M.fetchIssues = function()
-	local key = u.getKey()
+	local key = utils.getKey()
 	if key then
-		i.pickIssue(i.fetchIssues(key))
+		local list_issues = api.fetchIssues()
+		issues.pickIssue(list_issues)
 	else
 		print("API Key not found")
 	end
 end
 
 M.createIssue = function()
-	local key = u.getKey()
+	local key = utils.getKey()
 	if key then
-		i.createIssue(key)
+		issues.createIssue(key)
 	else
 		print("API Key not found")
 	end

@@ -3,6 +3,7 @@ local Popup = require("nui.popup")
 local Menu = require("nui.menu")
 local utils = require("linear.utils")
 local Issue = require("linear.models")
+local api = require("linear.api")
 
 ---@param issueItem issueItem
 ---@param id string
@@ -58,8 +59,9 @@ function M.showIssue(issueItem, id)
 		vim.cmd("!git checkout -b " .. id)
 	end, { noremap = true })
 	popup_main:map("n", "A", function()
-		-- TODO: For branch TW-52
-		print("Pending")
+		local update = api.updateIssue(obj["assignee_id"], obj["issue_id"])
+		local user_assigned = vim.tbl_get(update, "data", "issueUpdate", "issue", "assignee", "name")
+		print("Assigned ticket to: " .. user_assigned)
 	end, { noremap = true })
 	-- Set the buffer in wrap mode for better readability
 	vim.api.nvim_buf_set_option(popup_main.bufnr, "wrap", true)
