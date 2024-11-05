@@ -1,7 +1,6 @@
 local M = {}
 local Popup = require("nui.popup")
 local Menu = require("nui.menu")
-local utils = require("linear.utils")
 local Issue = require("linear.models")
 local api = require("linear.api")
 
@@ -74,11 +73,23 @@ function M.showIssue(issueItem, id)
 	vim.api.nvim_buf_set_option(popup_main.bufnr, "wrap", true)
 end
 
----@param item_list table
+function M.pickerHelp(type)
+	if type == "teams" then
+		return "team_id"
+	end
+	if type == "labels" then
+		return "label_id"
+	end
+	if type == "projects" then
+		return "project_id"
+	end
+end
+
 ---@param type string
-function M.pickItem(item_list, type)
+function M.pickItem(type, store)
+	local itemList = store:get(type)
 	local menu_list = {}
-	for _, value in ipairs(item_list) do
+	for _, value in ipairs(itemList) do
 		table.insert(menu_list, Menu.item(value[2]))
 	end
 	local menu = Menu({
@@ -107,7 +118,8 @@ function M.pickItem(item_list, type)
 			submit = { "<CR>", "<Space>" },
 		},
 		on_submit = function(item)
-			utils.state(item)
+			local id = M.pickerHelp(type)
+			store:set(id, item)
 		end,
 	})
 

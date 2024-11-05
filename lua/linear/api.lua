@@ -1,5 +1,6 @@
 local M = {}
 local utils = require("linear.utils")
+
 local LINEAR_API_URL = "https://api.linear.app/graphql"
 
 ---@alias issueList {branch: string, title: string, status: string}[]
@@ -33,12 +34,14 @@ function M.fetchSingleIssue(issueID)
 	return request
 end
 
+--@return table
 function M.fetchUserID()
 	local payload = '{"query":"query Nodes { users { nodes { id name } }}"}'
 	local request = utils.makeRequest(LINEAR_API_URL, payload)
 	return request
 end
 
+--@return table
 function M.updateIssue(userID, issueID)
 	if userID ~= nil or issueID ~= nil then
 		local payload = {
@@ -53,64 +56,37 @@ function M.updateIssue(userID, issueID)
 	end
 end
 
----@return table
--- local function getTeamID()
--- 	local teams = {}
--- 	local query = '{"query":"query Teams { teams { nodes { id name } }}"}'
--- 	local request = utils.makeRequest( LINEAR_API_URL, query)
--- 	for _, value in ipairs(request["data"]["teams"]["nodes"]) do
--- 		table.insert(teams, { value["id"], value["name"] })
--- 	end
--- 	return teams
--- end
-
----@return table
--- local function getLabelID()
--- 	local labels = {}
--- 	local query = '{"query":"query{ issueLabels {  nodes {  id  name }  }}"}'
--- 	local encoded_query = string.gsub(query, '"', '\\"')
--- 	local request = utils.makeRequest( LINEAR_API_URL, encoded_query)
--- 	for _, value in ipairs(request["data"]["issueLabels"]["nodes"]) do
--- 		table.insert(labels, { value["id"], value["name"] })
--- 	end
--- 	return labels
--- end
+--@return table
+function M.getTeamID()
+	local teams = {}
+	local payload = '{"query":"query Nodes {teams { nodes { id name }}}"}'
+	local request = utils.makeRequest(LINEAR_API_URL, payload)
+	for _, value in ipairs(request["data"]["teams"]["nodes"]) do
+		table.insert(teams, { value["id"], value["name"] })
+	end
+	return teams
+end
 
 --@return table
--- local function getProjectID()
--- 	local projects = {}
--- 	local query = '{"query":"query IssueLabels { issueLabels { nodes { id   name } }}"}'
--- 	local encoded_query = string.gsub(query, '"', '\\"')
--- 	local request = utils.makeRequest( LINEAR_API_URL, encoded_query)
--- 	for _, value in ipairs(request["data"]["projects"]["nodes"]) do
--- 		table.insert(projects, { value["id"], value["name"] })
--- 	end
--- 	return projects
--- end
+function M.getLabelID()
+	local labels = {}
+	local payload = '{"query":"query Nodes {issueLabels { nodes { id name}}}"}'
+	local request = utils.makeRequest(LINEAR_API_URL, payload)
+	for _, value in ipairs(request["data"]["issueLabels"]["nodes"]) do
+		table.insert(labels, { value["id"], value["name"] })
+	end
+	return labels
+end
 
--- function M.createIssue(, title, description)
--- 	local teamID = getTeamID()
--- local labelID = getLabelID()
--- local projectID = getProjectID()
+--@return table
+function M.getProjectID()
+	local projects = {}
+	local payload = '{"query":"query Nodes { projects {  nodes {id name    }}}"}'
+	local request = utils.makeRequest(LINEAR_API_URL, payload)
+	for _, value in ipairs(request["data"]["projects"]["nodes"]) do
+		table.insert(projects, { value["id"], value["name"] })
+	end
+	return projects
+end
 
--- Get user to pick via ui
--- local team_pick = ui.pickItem(teamID, "Team")
--- print(team_pick)
--- local label_pick = ui.pickItem(labelID, "Label")
--- local project_pick = ui.pickItem(projectID, "Project")
-
--- local query = string.format(
--- 	[[ '{"query":"mutation IssueCreate { issueCreate( input: { title: \"%s\"  description: \"%s\"  teamId: \"%s\"  labelIds: \"%s\"  projectId: \"%s\" }){ success issue { id title }}}",}']],
--- 	title,
--- 	description,
--- 	teamID,
--- 	labelID,
--- 	projectID
--- )
--- local encoded_query = string.gsub(query, '"', '\\"')
--- local request = utils.makeRequest( LINEAR_API_URL, encoded_query)
--- if not request["data"]["issueCreate"]["success"] then
--- 	print("Issue not created")
--- end
--- end
 return M
