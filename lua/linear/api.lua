@@ -33,16 +33,24 @@ function M.fetchSingleIssue(issueID)
 	return request
 end
 
-function M.updateIssue(userID, issueID)
-	local payload = {
-		query = string.format(
-			'mutation IssueUpdate { issueUpdate( input: { assigneeId: "%s" }id: "%s") { issue { assignee { name }}}}',
-			userID,
-			issueID
-		),
-	}
-	local request = utils.makeRequest(LINEAR_API_URL, vim.json.encode(payload))
+function M.fetchUserID()
+	local payload = '{"query":"query Nodes { users { nodes { id name } }}"}'
+	local request = utils.makeRequest(LINEAR_API_URL, payload)
 	return request
+end
+
+function M.updateIssue(userID, issueID)
+	if userID ~= nil or issueID ~= nil then
+		local payload = {
+			query = string.format(
+				'mutation IssueUpdate { issueUpdate( input: { assigneeId: "%s" }id: "%s") { issue { assignee { name }}}}',
+				userID,
+				issueID
+			),
+		}
+		local request = utils.makeRequest(LINEAR_API_URL, vim.json.encode(payload))
+		return request
+	end
 end
 
 ---@return table

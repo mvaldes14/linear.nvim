@@ -2,7 +2,6 @@ local Issue = {}
 Issue.defaults = {
 	issue_id = "Not Defined",
 	assignee = "Not Assigned",
-	assignee_id = "Not Assigned",
 	project = "Not Defined",
 	label = "Not Defined",
 	title = "Not Defined",
@@ -19,7 +18,6 @@ function Issue:new(field)
 		issue_id = vim.tbl_get(field, "data", "issue", "id"),
 		title = vim.tbl_get(field, "data", "issue", "title"),
 		assignee = vim.tbl_get(field, "data", "issue", "assignee", "name"),
-		assignee_id = vim.tbl_get(field, "data", "issue", "assignee", "id"),
 		state = vim.tbl_get(field, "data", "issue", "state", "name"),
 		project = vim.tbl_get(field, "data", "issue", "project", "name"),
 		label = vim.tbl_get(field, "data", "issue", "priorityLabel"),
@@ -44,7 +42,7 @@ function Issue:print_result()
 end
 
 function Issue:get(key)
-	return vim.tbl_get(self, key)
+	return self[key]
 end
 
 return Issue
