@@ -59,9 +59,16 @@ function M.showIssue(issueItem, id)
 		vim.cmd("!git checkout -b " .. id)
 	end, { noremap = true })
 	popup_main:map("n", "A", function()
-		local update = api.updateIssue(obj["assignee_id"], obj["issue_id"])
-		local user_assigned = vim.tbl_get(update, "data", "issueUpdate", "issue", "assignee", "name")
-		print("Assigned ticket to: " .. user_assigned)
+		local issue_id = obj:get("issue_id")
+		local user_data = api.fetchUserID()
+		-- TODO: This returns a nested list so we grab the first item from it, hopefully people dont have multiple ids
+		local user_id = vim.tbl_get(user_data, "data", "users", "nodes", 1, "id")
+		local user_assigned = vim.tbl_get(user_data, "data", "users", "nodes", 1, "name")
+		print(user_id, issue_id)
+		local update = api.updateIssue(user_id, issue_id)
+		if update ~= nil then
+			print("Assigned ticket to: " .. user_assigned)
+		end
 	end, { noremap = true })
 	-- Set the buffer in wrap mode for better readability
 	vim.api.nvim_buf_set_option(popup_main.bufnr, "wrap", true)
