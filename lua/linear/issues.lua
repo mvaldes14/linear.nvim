@@ -44,33 +44,15 @@ function M.createIssue()
 	local teamID = api.getTeamID()
 	local labelID = api.getLabelID()
 	local projectID = api.getProjectID()
-	s:set("teams", teamID)
-	s:set("labels", labelID)
-	s:set("projects", projectID)
 
 	--Get user to pick via ui
-	for _, value in ipairs({ "teams", "labels", "projects" }) do
-		ui.pickItem(value, s)
+	for key, value in pairs({ team = teamID, label = labelID, project = projectID }) do
+		ui.pickItem(key, value, s)
 	end
 
-	vim.defer_fn(function()
-		print(vim.inspect(store:get("team_id")))
-		print(vim.inspect(store:get("label_id")))
-		print(vim.inspect(store:get("project_id")))
-	end, 7000)
-	-- local query = string.format(
-	-- 	[[ '{"query":"mutation IssueCreate { issueCreate( input: { title: \"%s\"  description: \"%s\"  teamId: \"%s\"  labelIds: \"%s\"  projectId: \"%s\" }){ success issue { id title }}}",}']],
-	-- 	title,
-	-- 	description,
-	-- 	teamID,
-	-- 	labelID,
-	-- 	projectID
-	-- )
-	-- local encoded_query = string.gsub(query, '"', '\\"')
-	-- local request = utils.makeRequest(LINEAR_API_URL, encoded_query)
-	-- if not request["data"]["issueCreate"]["success"] then
-	-- 	print("Issue not created")
-	-- end
+	for _, value in ipairs({ "title", "description" }) do
+		ui.getInput(value, s)
+	end
 end
 
 return M

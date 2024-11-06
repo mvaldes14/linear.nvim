@@ -62,7 +62,7 @@ function M.getTeamID()
 	local payload = '{"query":"query Nodes {teams { nodes { id name }}}"}'
 	local request = utils.makeRequest(LINEAR_API_URL, payload)
 	for _, value in ipairs(request["data"]["teams"]["nodes"]) do
-		table.insert(teams, { value["id"], value["name"] })
+		table.insert(teams, { id = value["id"], name = value["name"] })
 	end
 	return teams
 end
@@ -73,7 +73,7 @@ function M.getLabelID()
 	local payload = '{"query":"query Nodes {issueLabels { nodes { id name}}}"}'
 	local request = utils.makeRequest(LINEAR_API_URL, payload)
 	for _, value in ipairs(request["data"]["issueLabels"]["nodes"]) do
-		table.insert(labels, { value["id"], value["name"] })
+		table.insert(labels, { id = value["id"], name = value["name"] })
 	end
 	return labels
 end
@@ -84,9 +84,25 @@ function M.getProjectID()
 	local payload = '{"query":"query Nodes { projects {  nodes {id name    }}}"}'
 	local request = utils.makeRequest(LINEAR_API_URL, payload)
 	for _, value in ipairs(request["data"]["projects"]["nodes"]) do
-		table.insert(projects, { value["id"], value["name"] })
+		table.insert(projects, { id = value["id"], name = value["name"] })
 	end
 	return projects
+end
+
+function M.createIssue(title, description, team_id, label_id, project_id)
+	local query = string.format(
+		[[ '{"query":"mutation IssueCreate { issueCreate( input: { title: \"%s\"  description: \"%s\"  teamId: \"%s\"  labelIds: \"%s\"  projectId: \"%s\" }){ success issue { id title }}}",}']],
+		title,
+		description,
+		team_id,
+		label_id,
+		project_id
+	)
+	local encoded_query = string.gsub(query, '"', '\\"')
+	local request = utils.makeRequest(LINEAR_API_URL, encoded_query)
+	if not request["data"]["issueCreate"]["success"] then
+		print("Issue not created")
+	end
 end
 
 return M

@@ -1,12 +1,11 @@
 local Store = {}
 
 Store.defaults = {
-	teams = "Test Team",
-	projects = "Test Project",
-	labels = "Test Label",
 	team_id = "Not Defined",
 	project_id = "Not Defined",
 	label_id = "Not Defined",
+	title = "Not Defined",
+	description = "Not Defined",
 }
 
 function Store:new()

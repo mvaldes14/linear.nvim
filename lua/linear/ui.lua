@@ -1,6 +1,6 @@
 local M = {}
 local Popup = require("nui.popup")
-local Menu = require("nui.menu")
+local Input = require("nui.input")
 local Issue = require("linear.models")
 local api = require("linear.api")
 
@@ -86,22 +86,27 @@ function M.pickerHelp(type)
 end
 
 ---@param type string
-function M.pickItem(type, store)
-	local itemList = store:get(type)
-	local menu_list = {}
-	for _, value in ipairs(itemList) do
-		table.insert(menu_list, Menu.item(value[2]))
-	end
-	local menu = Menu({
+function M.pickItem(type, item_list, store)
+	vim.ui.select(item_list, {
+		prompt = "Select " .. type .. ":",
+		format_item = function(item)
+			return item["name"]
+		end,
+	}, function(choice)
+		store:set(type, choice["id"])
+	end)
+end
+
+function M.getInput(key, store)
+	local input = Input({
 		position = "50%",
 		size = {
-			width = 25,
-			height = 5,
+			width = 40,
 		},
 		border = {
-			style = "single",
+			style = "rounded",
 			text = {
-				top = "Choose: " .. type,
+				top = key,
 				top_align = "center",
 			},
 		},
@@ -109,21 +114,14 @@ function M.pickItem(type, store)
 			winhighlight = "Normal:Normal,FloatBorder:Normal",
 		},
 	}, {
-		lines = menu_list,
-		max_width = 20,
-		keymap = {
-			focus_next = { "j", "<Down>", "<Tab>" },
-			focus_prev = { "k", "<Up>", "<S-Tab>" },
-			close = { "<Esc>", "<C-c>" },
-			submit = { "<CR>", "<Space>" },
-		},
-		on_submit = function(item)
-			local id = M.pickerHelp(type)
-			store:set(id, item)
+		prompt = "> ",
+		enter = true,
+		on_submit = function(value)
+			store:set(key, value)
 		end,
 	})
 
-	-- mount the component
-	menu:mount()
+	-- mount/open the component
+	input:mount()
 end
 return M
