@@ -1,7 +1,7 @@
 local M = {}
 local Popup = require("nui.popup")
+local Input = require("nui.input")
 local Menu = require("nui.menu")
-local utils = require("linear.utils")
 local Issue = require("linear.models")
 local api = require("linear.api")
 
@@ -74,12 +74,13 @@ function M.showIssue(issueItem, id)
 	vim.api.nvim_buf_set_option(popup_main.bufnr, "wrap", true)
 end
 
----@param item_list table
 ---@param type string
-function M.pickItem(item_list, type)
-	local menu_list = {}
+---@param item_list table
+---@param store table
+local function selectItem(type, item_list, popup, show)
+	local temp_menu = {}
 	for _, value in ipairs(item_list) do
-		table.insert(menu_list, Menu.item(value[2]))
+		table.insert(temp_menu, Menu.item(value["name"]))
 	end
 	local menu = Menu({
 		position = "50%",
@@ -98,7 +99,7 @@ function M.pickItem(item_list, type)
 			winhighlight = "Normal:Normal,FloatBorder:Normal",
 		},
 	}, {
-		lines = menu_list,
+		lines = temp_menu,
 		max_width = 20,
 		keymap = {
 			focus_next = { "j", "<Down>", "<Tab>" },
@@ -107,11 +108,73 @@ function M.pickItem(item_list, type)
 			submit = { "<CR>", "<Space>" },
 		},
 		on_submit = function(item)
-			utils.state(item)
+			if show then
+				popup:mount()
+			end
+			vim.api.nvim_buf_set_lines(popup.bufnr, -1, -1, false, { item })
 		end,
 	})
-
-	-- mount the component
 	menu:mount()
+end
+
+local function getInput(key, popup)
+	return Input({
+		position = "50%",
+		size = {
+			width = 40,
+		},
+		border = {
+			style = "rounded",
+			text = {
+				top = key,
+				top_align = "center",
+			},
+		},
+		win_options = {
+			winhighlight = "Normal:Normal,FloatBorder:Normal",
+		},
+	}, {
+		prompt = "> ",
+		enter = true,
+		on_submit = function(value)
+			vim.api.nvim_buf_set_lines(popup.bufnr, -1, -1, false, { value })
+		end,
+	})
+end
+
+local function issuePopup()
+	return Popup({
+		border = {
+			style = "rounded",
+			text = {
+				top = "Create a new ticket",
+				top_align = "center",
+				bottom = "<S> Submit",
+				bottom_allign = "center",
+			},
+		},
+		position = "50%",
+		size = {
+			width = "80%",
+			height = "40%",
+		},
+		enter = true,
+		focusable = true,
+		buf_options = {
+			readonly = true,
+		},
+	})
+end
+
+function M.createIssue(store)
+	-- First pick inputs
+	local teams = store:get("teams")
+	local labels = store:get("labels")
+	local projects = store:get("projects")
+	local issue_pop = issuePopup()
+
+	-- Last Element to show
+	local get_title = getInput("title", issue_pop)
+	get_title:mount()
 end
 return M

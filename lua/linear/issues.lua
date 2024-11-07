@@ -7,7 +7,7 @@ local action_state = require("telescope.actions.state")
 local sorters = require("telescope.sorters")
 local ui = require("linear.ui")
 local api = require("linear.api")
-local utils = require("linear.utils")
+local store = require("linear.store")
 
 ---@param issueList issueList
 ---@return nil
@@ -37,6 +37,18 @@ function M.pickIssue(issueList)
 			end,
 		})
 		:find()
+end
+
+function M.createIssue()
+	local s = store:new()
+	local teamID = api.getTeamID()
+	local labelID = api.getLabelID()
+	local projectID = api.getProjectID()
+	s:set("teams", teamID)
+	s:set("labels", labelID)
+	s:set("projects", projectID)
+
+	ui.createIssue(s)
 end
 
 return M
