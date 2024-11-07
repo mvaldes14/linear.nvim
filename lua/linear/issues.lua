@@ -44,15 +44,11 @@ function M.createIssue()
 	local teamID = api.getTeamID()
 	local labelID = api.getLabelID()
 	local projectID = api.getProjectID()
+	s:set("teams", teamID)
+	s:set("labels", labelID)
+	s:set("projects", projectID)
 
-	--Get user to pick via ui
-	for key, value in pairs({ team = teamID, label = labelID, project = projectID }) do
-		ui.pickItem(key, value, s)
-	end
-
-	for _, value in ipairs({ "title", "description" }) do
-		ui.getInput(value, s)
-	end
+	ui.createIssue(s)
 end
 
 return M
