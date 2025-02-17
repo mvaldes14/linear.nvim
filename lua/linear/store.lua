@@ -1,8 +1,11 @@
 local Store = {}
 
 Store.defaults = {
-	current_issue_id = "",
-	current_user_id = "",
+	team_id = "Not Defined",
+	project_id = "Not Defined",
+	label_id = "Not Defined",
+	title = "Not Defined",
+	description = "Not Defined",
 }
 
 function Store:new()

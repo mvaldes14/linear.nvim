@@ -16,7 +16,7 @@ end
 M.createIssue = function()
 	local key = utils.getKey()
 	if key then
-		issues.createIssue(key)
+		issues.createIssue()
 	else
 		print("API Key not found")
 	end
